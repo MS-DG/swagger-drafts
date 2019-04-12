@@ -57,10 +57,7 @@ paths:
       requestBody:
         application/json:
           schema:
-            type: object
-            properties:
-              value:
-                type: string
+            $ref: '#/components/schemas/groupPermission'
       responses:
         '201': 
           description: Accepted
@@ -127,10 +124,7 @@ paths:
       requestBody:
         application/json:
           schema:
-            type: object
-            properties:
-              all:
-                type: string
+            $ref: '#/components/schemas/groupPermission'
       responses:
         '201': 
           description: Accepted
@@ -155,7 +149,7 @@ components:
         type:
             type: string
         permission:
-            type: string
+            $ref: '#/components/schemas/permission'
         members:
           type: array
           items:
@@ -172,12 +166,26 @@ components:
     groupMember:
       type: object
       properties:
-        userId:
+        id:
           type: string
           format: uuid
+        displayName:
+          type: string
+        avatar:
+          type: string
+        permission:
+          $ref: '#/components/schemas/groupPermission'
+    groupPermission:
+      type: object
+      properties:
+        all:
+          $ref: '#/components/schemas/permission'
     guid:
       type: string
       format: uuid
+    permission:
+      type: string
+      enum: [None,Read,Write,ReadWrite]
   requestBodies:
     group:
       description: postbody to create a group
@@ -194,7 +202,7 @@ components:
               type:
                 type: string
               permission:
-                type: string
+                $ref: '#/components/schemas/permission'
               folders:
                 type: array
                 items:
