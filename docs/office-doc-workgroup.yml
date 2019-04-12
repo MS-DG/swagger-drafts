@@ -69,7 +69,14 @@ paths:
       tags:
         - GroupFolder
       summary: link a folder to current group [not implement for now]
-      requestBodies:
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
         $ref: '#/components/requestBodies/groupFolder'
       responses:
         '201':
@@ -78,10 +85,17 @@ paths:
       tags:
         - GroupFolder
       summary: get all linked folders of current group
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description: OK
-          content:            
+          content:
             application/json:
               schema:
                 type: array
@@ -93,6 +107,12 @@ paths:
         - GroupMember
       summary: get group members
       parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
         - name: skip
           in: query
           required: false
@@ -148,13 +168,13 @@ components:
       properties:
         id:
           type: string
-          format: guid
+          format: uuid
         displayName:
             type: string
         thumbnail:
             type: string
         type:
-            type: string
+            $ref: '#/components/schemas/groupType'
         permission:
             $ref: '#/components/schemas/groupPermission'
         members:
@@ -193,6 +213,9 @@ components:
     permission:
       type: string
       enum: [None,Read,Write,ReadWrite]
+    groupType:
+      type: string
+      enum: [WorkGroup,ShareGroup]
   requestBodies:
     group:
       description: postbody to create a group
@@ -207,13 +230,13 @@ components:
               thumbnail:
                 type: string
               type:
-                type: string
+                $ref: '#/components/schemas/groupType'
               permission:
                 $ref: '#/components/schemas/groupPermission'
               folders:
                 type: array
                 items:
-                  type: string
+                  $ref: '#/components/schemas/groupFolder'
           example:
             displayName: Shennong Devs Workgroup
             thumbnail: https://pbs.twimg.com/profile_images/470993791243919360/D7rGy8Yx_400x400.jpeg
