@@ -55,8 +55,8 @@ paths:
           schema:
             type: string
       requestBody:
-        application/json:
-          schema:
+        content:
+          application/json:          
             $ref: '#/components/schemas/groupPermission'
       responses:
         '201': 
@@ -237,12 +237,6 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/groupFolder'
-          example:
-            displayName: Shennong Devs Workgroup
-            thumbnail: https://pbs.twimg.com/profile_images/470993791243919360/D7rGy8Yx_400x400.jpeg
-            type: "WorkGroup"
-            permission: "ReadWrite"
-            folders: ["fakeOneDrivePath"]
     groupFolder:
       description: postbody to link a folder to group
       required: true
