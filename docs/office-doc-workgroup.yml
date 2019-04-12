@@ -1,0 +1,214 @@
+openapi: "3.0.0"
+info:
+  title: OfficeDoc Groups APIs
+  version: v0.1
+tags:
+  - name: Group
+  - name: GroupFolder
+  - name: GroupMember
+
+paths:
+  /groups:
+    post:
+      tags:
+        - Group
+      summary: create a group
+      requestBody:
+        $ref: '#/components/requestBodies/group'
+      responses:
+        '201':
+          description: group created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/group'
+  /groups/{groupId}:
+    get:
+      tags:
+        - Group
+      summary: get a group
+      description: every time a user access a group, permission will be checked and the user will become a group member if he has not been yet.
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/group'
+        '404':
+          description: NotFound
+  /groups/{groupId}/permission:
+    patch:
+      tags:
+        - Group
+      summary: update group's permission, group owner only.
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        application/json:
+          schema:
+            type: object
+            properties:
+              value:
+                type: string
+      responses:
+        '201': 
+          description: Accepted
+        '403':
+          description: Forbidden
+
+  /groups/{groupId}/folders:
+    post:
+      tags:
+        - GroupFolder
+      summary: link a folder to current group [not implement for now]
+      requestBodies:
+        $ref: '#/components/requestBodies/groupFolder'
+      responses:
+        '201':
+          description: Linked
+    get:
+      tags:
+        - GroupFolder
+      summary: get all linked folders of current group
+      responses:
+        '200':
+          application/json:
+            schema:
+              type: array
+              items: 
+                $ref: '#/components/schemas/groupFolder'
+  /groups/{groupId}/members:
+    get:
+      tags:
+        - GroupMember
+      summary: get group members
+      parameters:
+        - name: skip
+          in: query
+          required: false
+          type: number
+        - name: top
+          in: query
+          required: false
+          type: number
+      responses:
+        '200':
+          application/json:
+            type: array
+            items:
+              $ref: '#/components/schemas/groupMember'
+  /groups/{groupId}/members/{memberId}/permission:
+    patch:
+      tags:
+        - GroupMember
+      summary: update member's permission, group owner only.
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        application/json:
+          schema:
+            type: object
+            properties:
+              all:
+                type: string
+      responses:
+        '201': 
+          description: Accepted
+        '403':
+          description: Forbidden
+   
+
+
+
+components:
+  schemas:
+    group:
+      type: object
+      properties:
+        id:
+          type: string
+          format: guid
+        displayName:
+            type: string
+        thumbnail:
+            type: string
+        type:
+            type: string
+        permission:
+            type: string
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/groupMember'
+        folders:
+          type: array
+          items:
+            $ref: '#/components/schemas/groupFolder'
+    groupFolder:
+      type: object
+      properties:
+        path:
+          type: string
+    groupMember:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+    guid:
+      type: string
+      format: uuid
+  requestBodies:
+    group:
+      description: postbody to create a group
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              displayName:
+                type: string
+              thumbnail:
+                type: string
+              type:
+                type: string
+              permission:
+                type: string
+              folders:
+                type: array
+                items:
+                  type: string
+          example:
+            displayName: Shennong Devs Workgroup
+            thumbnail: https://pbs.twimg.com/profile_images/470993791243919360/D7rGy8Yx_400x400.jpeg
+            type: "WorkGroup"
+            permission: "ReadWrite"
+            folders: ["fakeOneDrivePath"]
+    groupFolder:
+      description: postbody to link a folder to group
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/groupFolder'
