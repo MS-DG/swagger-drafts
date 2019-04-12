@@ -242,5 +242,4 @@ components:
       required: true
       content:
         application/json:
-          schema:
-            $ref: '#/components/schemas/groupFolder'
+          $ref: '#/components/schemas/groupFolder'
