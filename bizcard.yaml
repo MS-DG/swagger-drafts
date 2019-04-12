@@ -1,0 +1,639 @@
+openapi: "3.0.0"
+info:
+  title: BizCard APIs
+  version: v0.1
+tags:
+  - name: cards
+    description: everything about bizcard (CRUD, view others' bizcard)
+  - name: cardbox
+    description: actions related to cardbox
+  - name: users
+    description: user related apis
+  - name: groups
+    description: exchange cards 
+
+paths:
+  /cards:
+    post:
+      tags:
+        - cards
+      summary: create a bizcard
+      requestBody:
+        $ref: '#/components/requestBodies/card'
+      responses:
+        '201':
+          description: bizcard created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/card'
+  /cards/{id}:
+    parameters:
+      - name: id
+        required: true
+        in: path
+        schema:
+          $ref: '#/components/schemas/guid'
+    get:
+      tags: 
+        - cards
+      summary: get bizcard by id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/card'
+        '404':
+          description: not found bizcard by id
+    put:
+      tags:
+        - cards
+      summary: update bizcard by id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/requestBodies/card'
+      responses:
+        '201':
+          description: bizcard updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/card'
+        '404':
+          description: not found bizcard by id
+        '403':
+          description: the user has no permission to update this bizcard
+    delete:
+      tags:
+        - cards
+      summary: delete bizcard by id
+      responses:
+        '204': 
+          description: deleted
+        '404':
+          description: not found bizcard by id
+        '403':
+          description: the user has no permission to delete this bizcard
+  /cards/{id}/view:
+    get:
+      tags:
+        - cards
+      summary: take a view action on a card
+      description: |-
+        This api is not RESTful, it would expand _cardbox_ item of the card and combine them as a _cardview_ item. it would always update the _lastViewTime_ value in the _cardbox_ item, if the related _cardbox_ doesn't exist, an empty _cardbox_ item would be created. 
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/guid'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                
+                $ref: '#/components/schemas/cardboxCard'
+            
+  /me/cards:
+    get:
+      tags: 
+        - cards
+        - users
+      summary: get all of your bizcards
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/card'
+  /me/cardbox:
+    get:
+      tags:
+        - users
+        - cardbox
+      summary: get all bizcards in cardbox
+      parameters:
+        - name: top
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: skip
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/cardboxCard'
+  /me/cardbox/{cardId}:
+    put:
+      tags:
+        - cardbox
+      summary: save a bizcard to your cardbox
+      parameters:
+        - name: cardId
+          required: true
+          in: path
+          schema:
+            $ref: '#/components/schemas/guid'
+      requestBody:
+        $ref: '#/components/requestBodies/cardboxPatchAction'
+      responses:
+        '201':
+          description: card saved to your cardbox
+        '404':
+          description: not found card by id
+    delete:
+      tags:
+        - cardbox
+      parameters:
+        - name: cardId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/guid'
+      summary: remove a bizcard from your cardbox
+      responses:
+        '204':
+          description: deleted
+        '403':
+          description: the user has no permission
+        '404':
+          description: not found the card by id in your cardbox
+  /users/{userId}/cards:
+    get:
+      tags:
+        - users
+        - cards
+      summary: get someone's all public bizcards
+      parameters:
+        - name: userId
+          required: true
+          in: path
+          description: user's mpfUnionId
+          schema:
+            $ref: '#/components/schemas/guid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/card'
+  /groups:
+    post:
+      tags:
+        - groups
+      summary: create group
+      requestBody:
+        $ref: '#/components/requestBodies/groupPost'
+      responses:
+        '201':
+          description: group created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/group'
+  /groups/{id}:
+    parameters:
+      - name: id
+        required: true
+        in: path
+        description: group id
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: 
+        - groups
+      summary: get group by id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/group'
+        '404':
+          description: group not found
+    delete:
+      tags:
+        - groups
+      summary: delete group
+      responses:
+        '204':
+          description: deleted
+        '403':
+          description: forbidden, you don't own this group
+        '404':
+          description: group not found
+    put:
+      tags: 
+        - groups
+      summary: update group (name, description, expiry, etc)
+      requestBody:
+        $ref: '#/components/requestBodies/groupPost'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/group'
+  /groups/{id}/join:
+    parameters:
+      - name: id
+        required: true
+        in: path
+        description: group id
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags:
+        - groups
+      summary: join group as the name of some card
+      requestBody:
+        application/json:
+          schema:
+            type: object
+            properties:
+              cardId: 
+                type: string
+                format: uuid
+      responses:
+        '201':
+          description: joined
+        '404':
+          description: group or card not found
+        '403':
+          description: forbidden, the card is not yours
+  /groups/{id}/leave:
+    parameters:
+      - name: id
+        required: true
+        in: path
+        description: group id
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags:
+        - groups
+      summary: leave a group
+      requestBody:
+        application/json:
+          schema:
+            type: object
+            properties:
+              cardId: 
+                type: string
+                format: uuid
+      responses:
+        '204':
+          description: leaved
+        '404':
+          description: group or card not found
+        '403':
+          description: forbidden, the card is not yours
+  /groups/{id}/members:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: group id
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - groups 
+      summary: get all members of group
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/groupMember'
+  /me/memberOf:
+    get:
+      tags:
+        - users 
+        - groups 
+      summary: get all groups in which this user is
+      responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/group'
+  /me/groups:
+    get:
+      tags:
+        - users
+        - groups
+      summary: get all groups created by this user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/group'
+  /groups?code={code}&location={location}:
+    get:
+      tags: 
+        - groups
+      summary: get or create group with code and location
+      description: |-
+        get or create a group based on a 4-digit code and location combination, if the code & location has been mapped to some group, return the group directly, otherwise, create a group and map it to the code & location combination, and return it.
+      parameters: 
+        - name: code
+          required: true
+          in: query
+          description: the group code, 4 digits
+          schema:
+            type: string
+            format: '^\d{4}$'
+        - name: location
+          required: true
+          in: query
+          description: user's current location. format = {lon},{lat}
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/group'
+        '201':
+          description: group created
+
+components:
+  schemas:
+    card:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/guid'
+        mpfUninonId:
+          $ref: '#/components/schemas/guid'
+        mpfUserId:
+          $ref: '#/components/schemas/guid'
+        wxUnionId:
+          type: string
+        wxOpenId:
+          type: string
+        cardCover:
+          type: string
+        displayName:
+          type: string
+        avatar:
+          type: string
+        emailAddress:
+          type: string
+        phoneNumber:
+          type: string
+        introduction:
+          type: string
+        organization:
+          type: string
+        title:
+          type: string
+        address: 
+          type: string
+        tags:
+          type: string
+        status:
+          type: number
+      example:
+        id: 04c7a0a7-9157-4666-aac4-ce8d7c273353
+        mpfUninonId: bf831cc1-3e06-45fe-a3d0-fd76a11a2071
+        mpfUserId: 4e81ab58-7901-4191-9b71-6682b815439f
+        wxUnionId: fakeUnionId
+        wxOpenId: fakeOpenId
+        cardCover: https://pbs.twimg.com/profile_images/470993791243919360/D7rGy8Yx_400x400.jpeg
+        displayName: Shelock Holmes
+        avatar: https://pbs.twimg.com/profile_images/470993791243919360/D7rGy8Yx_400x400.jpeg
+        emailAddress: sherlockh@watsond.com
+        phoneNumber: 12345678
+        introduction: There is nothing more deceptive than an obvious fact.
+        organization: Watson Detective Agency
+        title: Detective
+        address: 221B Baker Street, London, England
+        tags: 
+        status: 0
+    cardboxCard:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/guid'
+        mpfUninonId:
+          $ref: '#/components/schemas/guid'
+        mpfUserId:
+          $ref: '#/components/schemas/guid'
+        wxUnionId:
+          type: string
+        wxOpenId:
+          type: string
+        cardCover:
+          type: string
+        displayName:
+          type: string
+        avatar:
+          type: string
+        emailAddress:
+          type: string
+        phoneNumber:
+          type: string
+        introduction:
+          type: string
+        organization:
+          type: string
+        title:
+          type: string
+        address: 
+          type: string
+        tags:
+          type: string
+        status:
+          type: number
+        source:
+          type: string
+        sourceParam:
+          type: string
+        remark:
+          type: string
+      example:
+        id: 04c7a0a7-9157-4666-aac4-ce8d7c273353
+        mpfUninonId: bf831cc1-3e06-45fe-a3d0-fd76a11a2071
+        mpfUserId: 4e81ab58-7901-4191-9b71-6682b815439f
+        wxUnionId: fakeUnionId
+        wxOpenId: fakeOpenId
+        cardCover: https://pbs.twimg.com/profile_images/470993791243919360/D7rGy8Yx_400x400.jpeg
+        displayName: Shelock Holmes
+        avatar: https://pbs.twimg.com/profile_images/470993791243919360/D7rGy8Yx_400x400.jpeg
+        emailAddress: sherlockh@watsond.com
+        phoneNumber: 12345678
+        introduction: There is nothing more deceptive than an obvious fact.
+        organization: Watson Detective Agency
+        title: Detective
+        address: 221B Baker Street, London, England
+        tags: 
+        status: 0
+        source: group
+        sourceParam: fakeGroupId
+        remark: the best detective
+    group:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        ownerId:
+          type: string
+          format: uuid
+        ownerCardId:
+          type: string
+          format: uuid
+        ownerDisplayName:
+          type: string
+        ownerAvatar:
+          type: string
+        createdDateTime:
+          type: string
+          format: date-time
+        createdLocation:
+          type: string
+        openBefore:
+          type: string
+          format: date-time
+        isOpen:
+          type: bool
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/groupMember'
+    groupMember:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        isOwner:
+          type: bool
+        card:
+          $ref: '#/components/schemas/card'
+    guid:
+      type: string
+      format: uuid
+  requestBodies:
+    card:
+      description: postbody to create a bizcard
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              cardCover:
+                type: string
+              displayName:
+                type: string
+              avatar:
+                type: string
+              emailAddress:
+                type: string
+                format: email
+              phoneNumber:
+                type: string
+                format: phone
+              introduction:
+                type: string
+              organization:
+                type: string
+              title:
+                type: string
+              address: 
+                type: string
+              tags:
+                type: string
+              status:
+                type: integer
+          example:
+            cardCover: https://pbs.twimg.com/profile_images/470993791243919360/D7rGy8Yx_400x400.jpeg
+            displayName: Shelock Holmes
+            avatar: https://pbs.twimg.com/profile_images/470993791243919360/D7rGy8Yx_400x400.jpeg
+            emailAddress: sherlockh@watsond.com
+            phoneNumber: 12345678
+            introduction: There is nothing more deceptive than an obvious fact.
+            organization: Watson Detective Agency
+            title: Detective
+            address: 221B Baker Street, London, England
+            tags: 
+            status: 0
+    cardboxPatchAction:
+      description: partial update bizcard request
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              source:
+                type: string
+              sourceParam:
+                type: string
+              remark:
+                type: string
+          example:
+            source: group
+            sourceParam: fakeGroupId
+            remark: the best detective
+    groupPost:
+      description: create group
+      required: true
+      content:
+        application/json:
+          schema: 
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              expiresAt:
+                type: string
+                format: date-time
