@@ -34,6 +34,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: expandMembers
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         "200":
           description: OK
@@ -174,7 +180,11 @@ components:
           $ref: "#/components/schemas/groupType"
         permission:
           $ref: "#/components/schemas/groupPermission"
+        ownerId:
+          type: string
+          format: uuid
         members:
+          description: the first member is always the owner
           type: array
           items:
             $ref: "#/components/schemas/groupMember"
@@ -206,9 +216,6 @@ components:
       properties:
         all:
           $ref: "#/components/schemas/permission"
-    guid:
-      type: string
-      format: uuid
     permission:
       type: string
       enum: [None, Read, Write, ReadWrite]
