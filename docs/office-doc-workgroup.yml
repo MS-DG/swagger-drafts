@@ -14,14 +14,14 @@ paths:
         - Group
       summary: create a group
       requestBody:
-        $ref: '#/components/requestBodies/group'
+        $ref: "#/components/requestBodies/group"
       responses:
-        '201':
+        "201":
           description: group created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/group'
+                $ref: "#/components/schemas/group"
   /groups/{groupId}:
     get:
       tags:
@@ -35,13 +35,13 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/group'
-        '404':
+                $ref: "#/components/schemas/group"
+        "404":
           description: NotFound
   /groups/{groupId}/permission:
     patch:
@@ -56,12 +56,12 @@ paths:
             type: string
       requestBody:
         content:
-          application/json:          
-            $ref: '#/components/schemas/groupPermission'
+          application/json:
+            $ref: "#/components/schemas/groupPermission"
       responses:
-        '201': 
+        "201":
           description: Accepted
-        '403':
+        "403":
           description: Forbidden
 
   /groups/{groupId}/folders:
@@ -77,9 +77,9 @@ paths:
             type: string
             format: uuid
       requestBody:
-        $ref: '#/components/requestBodies/groupFolder'
+        $ref: "#/components/requestBodies/groupFolder"
       responses:
-        '201':
+        "201":
           description: Linked
     get:
       tags:
@@ -93,14 +93,14 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 type: array
-                items: 
-                  $ref: '#/components/schemas/groupFolder'
+                items:
+                  $ref: "#/components/schemas/groupFolder"
   /groups/{groupId}/members:
     get:
       tags:
@@ -124,14 +124,14 @@ paths:
           schema:
             type: number
       responses:
-        '200':
+        "200":
           description: OK
-          content:  
+          content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/groupMember'
+                  $ref: "#/components/schemas/groupMember"
   /groups/{groupId}/members/{memberId}/permission:
     patch:
       tags:
@@ -151,15 +151,12 @@ paths:
       requestBody:
         application/json:
           schema:
-            $ref: '#/components/schemas/groupPermission'
+            $ref: "#/components/schemas/groupPermission"
       responses:
-        '201': 
+        "201":
           description: Accepted
-        '403':
+        "403":
           description: Forbidden
-   
-
-
 
 components:
   schemas:
@@ -170,26 +167,28 @@ components:
           type: string
           format: uuid
         displayName:
-            type: string
+          type: string
         thumbnail:
-            type: string
+          type: string
         type:
-            $ref: '#/components/schemas/groupType'
+          $ref: "#/components/schemas/groupType"
         permission:
-            $ref: '#/components/schemas/groupPermission'
+          $ref: "#/components/schemas/groupPermission"
         members:
           type: array
           items:
-            $ref: '#/components/schemas/groupMember'
+            $ref: "#/components/schemas/groupMember"
         folders:
           type: array
           items:
-            $ref: '#/components/schemas/groupFolder'
+            $ref: "#/components/schemas/groupFolder"
     groupFolder:
       type: object
       properties:
         path:
           type: string
+        type:
+          $ref: "#/components/schemas/folderType"
     groupMember:
       type: object
       properties:
@@ -201,21 +200,24 @@ components:
         avatar:
           type: string
         permission:
-          $ref: '#/components/schemas/groupPermission'
+          $ref: "#/components/schemas/groupPermission"
     groupPermission:
       type: object
       properties:
         all:
-          $ref: '#/components/schemas/permission'
+          $ref: "#/components/schemas/permission"
     guid:
       type: string
       format: uuid
     permission:
       type: string
-      enum: [None,Read,Write,ReadWrite]
+      enum: [None, Read, Write, ReadWrite]
     groupType:
       type: string
-      enum: [WorkGroup,ShareGroup]
+      enum: [WorkGroup, ShareGroup]
+    folderType:
+      type: string
+      enum: [OneDrive, OneDrive4Business, TempStorage]
   requestBodies:
     group:
       description: postbody to create a group
@@ -230,16 +232,16 @@ components:
               thumbnail:
                 type: string
               type:
-                $ref: '#/components/schemas/groupType'
+                $ref: "#/components/schemas/groupType"
               permission:
-                $ref: '#/components/schemas/groupPermission'
+                $ref: "#/components/schemas/groupPermission"
               folders:
                 type: array
                 items:
-                  $ref: '#/components/schemas/groupFolder'
+                  $ref: "#/components/schemas/groupFolder"
     groupFolder:
       description: postbody to link a folder to group
       required: true
       content:
         application/json:
-          $ref: '#/components/schemas/groupFolder'
+          $ref: "#/components/schemas/groupFolder"
