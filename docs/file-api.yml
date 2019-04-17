@@ -236,7 +236,7 @@ paths:
                 type: bool
         201:
           description: Unauthorized
-/v2.0/storage/share:
+  /v2.0/storage/share:
     post:
       tags:
       - share 
