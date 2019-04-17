@@ -151,7 +151,7 @@ paths:
         schema:
           type: string
           format: byte
-        responses:
+      responses:
         200:
           description: The data of the downloaded file
           content:
