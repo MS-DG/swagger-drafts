@@ -132,7 +132,7 @@ paths:
                 format: binary
         201:
           description: Unauthorized
-    /v2.0/storage/me/{storageType}/items/{fileId}/downloadurl:
+  /v2.0/storage/me/{storageType}/items/{fileId}/downloadurl:
     get:
       tags:
       - download url
