@@ -209,6 +209,66 @@ paths:
                 $ref: '#/components/schemas/childrenResult'
         201:
           description: Unauthorized
+    post:
+      tags:
+      - create folder
+      summary: create a folder
+      parameters:
+      - in: path
+        name: storageType
+        description: The Storage to get children files from
+        required: true
+        schema:
+          $ref: '#/components/schemas/storageType'
+      - in: path
+        name: fileId
+        description: The fileId of a folder
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: folderName
+        description: The name of child folder
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: File metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/childrenResult'
+        201:
+          description: Unauthorized
+  /v2.0/storage/me/{storageType}/items/{fileId}/meta:
+    get:
+      tags:
+      - metadata
+      summary: Get item metadata
+      parameters:
+      - in: path
+        name: storageType
+        description: The Storage to get children files from
+        required: true
+        schema:
+          $ref: '#/components/schemas/storageType'
+      - in: path
+        name: fileId
+        description: The fileId of a folder
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: File metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/childrenResult'
+        201:
+          description: Unauthorized
+  
   /v2.0/storage/me/{storageType}/items/{fileId}:
     delete:
       tags:
