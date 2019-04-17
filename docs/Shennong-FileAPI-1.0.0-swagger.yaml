@@ -1,0 +1,236 @@
+openapi: 3.0.1
+info:
+  description: Microsoft.Shennong.CommonService.FileAPI
+  version: '2.0'
+  title: FileAPI
+servers:
+  - url: 'https://mpstorage-int.chinacloudsites.cn'
+    description: v2.0 Gallatin
+  - url: 'https://ww-fileapi-int.azurewebsites.net'
+    description: v2.0 WorldWide
+  - url: 'https://localhost:44390'
+    description: Local Debug
+tags:
+- name: upload
+  description: Upload a file to storage
+- name: download
+  description: Download a file from storage
+- name: children
+  description: Get the file list of the children of a folder
+- name: delete
+  description: Delete a file from fstorage
+security:
+- headerBearer: []
+- headerToken: []
+- queryToken: []
+paths:
+  /v2.0/storage/me/{storageType}/{filePath}/upload:
+    post:
+      tags:
+      - upload
+      summary: Upload a file to storage
+      parameters:
+      - in: path
+        name: storageType
+        description: The Storage to upload file to
+        required: true
+        schema:
+          $ref: '#/components/schemas/storageType'
+      - in: path
+        name: filePath
+        description: base64 url encoded filePath
+        required: true
+        schema:
+          type: string
+          format: byte
+      requestBody:
+        description: Data of the file
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+        required: true
+      responses:
+        200:
+          description: Meta info of the uploaded file
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/uploadResult'
+        201:
+          description: Unauthorized
+  /v2.0/storage/me/{storageType}/items/{fileId}/content:
+    get:
+      tags:
+      - download
+      summary: Download a file from storage
+      parameters:
+      - in: path
+        name: storageType
+        description: The Storage to download file from
+        required: true
+        schema:
+          $ref: '#/components/schemas/storageType'
+      - in: path
+        name: fileId
+        description: The fileId of an item in storage
+        required: true
+        schema:
+          type: string
+          format: byte
+      - in: query
+        name: allowRedirect
+        description: If allow redirect the download request to storage service source.
+        required: false
+        schema:
+          type: boolean
+      responses:
+        200:
+          description: The data of the downloaded file
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        201:
+          description: Unauthorized
+  /v2.0/storage/me/{storageType}/children:
+    get:
+      tags:
+      - children
+      summary: Get files in the root folder
+      parameters:
+      - in: path
+        name: storageType
+        description: The Storage to get children files from
+        required: true
+        schema:
+          $ref: '#/components/schemas/storageType'
+      responses:
+        200:
+          description: File list result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/childrenResult'
+        201:
+          description: Unauthorized
+  /v2.0/storage/me/{storageType}/items/{fileId}/children:
+    get:
+      tags:
+      - children
+      summary: Get files in the folder that fileId specifies
+      parameters:
+      - in: path
+        name: storageType
+        description: The Storage to get children files from
+        required: true
+        schema:
+          $ref: '#/components/schemas/storageType'
+      - in: path
+        name: fileId
+        description: The fileId of a folder
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: File list result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/childrenResult'
+        201:
+          description: Unauthorized
+  /v2.0/storage/me/{storageType}/items/{fileId}:
+    delete:
+      tags:
+      - delete
+      summary: Delete a file
+      parameters:
+      - in: path
+        name: storageType
+        description: The Storage that file to delete belongs to
+        required: true
+        schema:
+          $ref: '#/components/schemas/storageType'
+      - in: path
+        name: fileId
+        description: The fileId of a folder
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Delete result
+          content:
+            application/json:
+              schema:
+                type: bool
+        201:
+          description: Unauthorized
+components:
+  # Authorization Methods
+  securitySchemes:
+    headerBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    headerToken:
+      type: apiKey
+      name: token
+      in: header
+    queryToken:
+      type: apiKey
+      name: token
+      in: query
+  # Request/Response datas.
+  schemas:
+    #### Request parameters.
+    storageType:
+      type: string
+      enum:
+        - PrivateBlob
+        - TempBlob
+        - PublicBlob
+        - OneDrive
+        - OFB
+        - DGStorage
+    #### Responses
+    uploadResult:
+      type: object
+      properties:
+        ## Common properties
+        fileName:
+          type: string
+        fileId:
+          type: string
+        fileSize:
+          type: string
+        lastModifiedTime:
+          type: date-time
+        downloadUrl:
+          type: string
+        storageType:
+          $ref: '#/components/schemas/storageType'
+        parentPath:
+          type: string
+        ## DGStorage only
+        filePath:
+          type: string
+        ## v1.0 compatibility
+        driveId:
+          type: string
+        itemType:
+          type: string
+        createTimeTicks:
+          type: integer
+          format: int64
+        UpdateTimeTicks:
+          type: int64
+          format: int64
+    childrenResult:
+      type: array
+      items:
+        $ref: '#/components/schemas/uploadResult'
