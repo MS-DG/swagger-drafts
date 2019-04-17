@@ -236,6 +236,33 @@ paths:
                 type: bool
         201:
           description: Unauthorized
+/v2.0/storage/share:
+    post:
+      tags:
+      - share 
+      summary: share a file or folder
+      parameters:
+      - in: path
+        name: storageType
+        description: The Storage that file to delete belongs to
+        required: true
+        schema:
+          $ref: '#/components/schemas/storageType'
+      - in: body
+        name: shareCodeRequest
+        description: share request body
+        required: true
+        schema:
+          $ref: '#/components/schemas/ShareCodeRequest'
+      responses:
+        200:
+          description: share code 
+          content:
+            application/json:
+              schema:
+                 $ref: '#/components/schemas/ShareResult'
+        201:
+          description: Unauthorized
 components:
   # Authorization Methods
   securitySchemes:
@@ -263,6 +290,18 @@ components:
         - OneDrive
         - OFB
         - DGStorage
+    ShareType:
+      type: string
+      enum:
+        - File
+        - Folder
+        - FileList
+    SharePermission:
+      type: string
+      enum:
+        - Read
+        - Write
+        - None
     #### Responses
     uploadResult:
       type: object
@@ -300,3 +339,37 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/uploadResult'
+    ShareCodeRequest:
+      type: object
+      properties:
+        FromUser: 
+          type: string
+        StorageType:
+          $ref: '#/components/schemas/storageType'
+        ShareType:
+          $ref: '#/components/schemas/ShareType'
+        Permission:
+          $ref: '#/components/schemas/SharePermission'
+        Items:
+          type: array
+          items:
+          $ref: '#/components/schemas/ToShareItem'
+    ToShareItem:
+      type: object
+      properties:
+        FileId:
+          type: string
+        FilePath:
+          type: string
+        BlobUrl:
+          type: string
+    ShareResult:
+      type: object
+      properties:
+        Success:
+          type: bool
+        ShareCode:
+          type: string
+          
+        
+
