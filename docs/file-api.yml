@@ -19,6 +19,8 @@ tags:
   description: Get the file list of the children of a folder
 - name: delete
   description: Delete a file from fstorage
+- name: publication
+  description: Publish and copy from user's storage
 security:
 - headerBearer: []
 - headerToken: []
@@ -323,6 +325,140 @@ paths:
                  $ref: '#/components/schemas/ShareResult'
         201:
           description: Unauthorized
+  /v2.0/storage/{storageType}/{filePath}/publish:
+    post:
+      tags:
+        - publication
+      description: create a publication from a file/folder specified by the {storageType}/{filePath}. 
+      parameters:
+        - name: storageType
+          in: path
+          required: true
+          schema: 
+            $ref: '#/components/schemas/storageType'
+        - name: filePath
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/publishResult'
+        403:
+          description: published files total size limit exceeded.
+        404:
+          description: target folder/file not found. 
+  /v2.0/storage/{storageType}/items/{fileId}/publish:
+    post:
+      tags:
+        - publication
+      description: create a publication from a file/folder specified by the fileId.
+      parameters:
+        - name: storageType
+          in: path
+          required: true
+          schema: 
+            $ref: '#/components/schemas/storageType'
+        - name: fileId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/publishResult'
+        403:
+          description: published files total size limit exceeded.
+        404:
+          description: target folder/file not found. 
+  /v2.0/publications/{publicationId}:
+    get:
+      tags:
+        - publication
+      parameters:
+        - name: publicationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#components/schemas/publication'
+    delete:
+      tags:
+        - publication
+      description: delete a publication, owner only operation.
+      parameters:
+        - name: publicationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: deleted
+        404:
+          description: publication not found.
+  /v2.0/publications/{publicationId}/copy:
+    post:
+      tags:
+        - publication
+      description: copy a published file/folder to user's own storage, a monitor would be returned to track the status of the copy operation.
+      parameters:
+        - name: publicationId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: requestBody
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              destFileId:
+                type: string
+              acceptOriginalFiles:
+                type: boolean
+      responses:
+        202:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  monitorId:
+                    type: string
+        403:
+          description: destination size not enough.
+        404:
+          description: publication not found
+
+  /v2.0/monitors/{monitorId}:
+    get:
+      security: 
+        - anonymous
+      parameters:
+        - name: monitorId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#components/schemas/monitor'
 components:
   # Authorization Methods
   securitySchemes:
@@ -363,6 +499,48 @@ components:
         - Write
         - None
     #### Responses
+    monitor:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - notStarted
+            - inProcess
+            - completed
+            - failed
+        percentage:
+          type: number
+        operation:
+          type: string
+        result:
+          type: object
+        description:
+          type: string
+    publication:
+      type: object
+      properties:
+        authorId: 
+          type: string
+        createdTimestamp:
+          type: string
+          format: date-time
+        size:
+          type: number
+        children:
+          type: array
+          items:
+            type: object
+            properties:
+              location:
+                type: string
+              size:
+                type: number
+    publishResult:
+      type: object
+      properties:
+        publicationId:
+          type: string
     uploadResult:
       type: object
       properties:
@@ -430,6 +608,3 @@ components:
           type: bool
         ShareCode:
           type: string
-          
-        
-
