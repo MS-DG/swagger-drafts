@@ -9,7 +9,7 @@ paths:
     post:
       tags:
         - Report
-      description: _docId_ and _ext_ should be specified at least one, when both specified, the _docId_ will be picked.
+      description: _docId_ and _ext_(externalDocumentType) should be specified at least one, when both specified, the _docId_ will be picked. when specified _ext_, the other parameters in query will be treated as the params of the external document
       parameters:
         - name: docId
           required: false
@@ -23,6 +23,8 @@ paths:
           in: query
           schema:
             type: string
+            enum:
+              - officedoc
       requestBody:
         $ref: "#/components/requestBodies/reportMessage"
       responses:
