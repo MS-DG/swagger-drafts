@@ -1,0 +1,60 @@
+openapi: 3.0.1
+info:
+  version: "1.1"
+  title: CDS
+tags:
+  - name: Report
+paths:
+  /v1.1/report:
+    post:
+      tags:
+        - Report
+      description: _docId_ and _ext_ should be specified at least one, when both specified, the _docId_ will be picked.
+      parameters:
+        - name: docId
+          required: false
+          description: when specified, the local cds document with id==docId is targeted
+          in: query
+          schema:
+            type: string
+        - name: ext
+          required: false
+          description: when specified, an external document is targeted.
+          in: query
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/reportMessage"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/reportResult"
+
+components:
+  requestBodies:
+    reportMessage:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              reporterId:
+                type: string
+                format: uuid
+              reason:
+                type: string
+                enum:
+                  - political
+                  - adult
+                  - cheat
+              remarks:
+                type: string
+  schemas:
+    reportResult:
+      type: object
+      properties:
+        success:
+          type: boolean
